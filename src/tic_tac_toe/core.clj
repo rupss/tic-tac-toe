@@ -6,8 +6,8 @@
 
 (defn get-empty-board
 	[]
-	  (apply str 
-	  	(interpose " " (repeat 3 "___")))
+	  (into [] (repeat 3
+	  	(into [] (repeat 3 :empty))))
 	)
 
 (defn print-board
@@ -23,7 +23,7 @@
   "Tic-tac-toe main method"
   [& args]
   (println "Hello, World!")
-  (print-board [[:empty :x :o]]))
+  (print-board (get-empty-board)))
 
 
 
