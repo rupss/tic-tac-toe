@@ -58,23 +58,19 @@
 	[board row col curr-player]
 	(let [working-row (nth board row)]
 		(if (not (nth working-row col))
-			 (do 
-				(into [] (concat (subvec working-row 0 col) 
-						 		 (vector curr-player) 
-							 	 (subvec working-row (+ col 1))))
-				(println "in get-modified-row")
-				(println (into [] (concat (subvec working-row 0 col) 
-							 (vector curr-player) 
-							 (subvec working-row (+ col 1))))))
+			(into [] (nth-replace working-row col curr-player))
+				; (into [] (vector (subvec working-row 0 col) 
+				; 			 	 (vector curr-player) 
+				; 			 	 (subvec working-row (+ col 1))))
 			working-row
-			; (println working-row)
 			)))
 
 (defn update-board
 	[board row col curr-player]
-	(into [] (concat (subvec board 0 row) 
-			(get-modified-row board row col curr-player)
-			(subvec board (+ row 1)))))
+	; (filter (fn[x] (not (empty? x))) (vector (subvec board 0 row) 
+	; 				 						 (get-modified-row board row col curr-player)
+	; 				 						 (subvec board (+ row 1)))))
+	(into [] (nth-replace board row (get-modified-row board row col curr-player))))
 
 (defn apply-move
 	[board curr-player]
@@ -83,12 +79,20 @@
 				(println "Invalid move")
 				(update-board board square curr-player))))
 
-(defn splice
-	[place replacement original]
-	(let [split-point (min place (count original))]
-		(into [] (concat (subvec original 0 split-point)
-				  		  (vector replacement)
-				  		  (subvec original (+ split-point 1))))))
+; (defn splice
+; 	[place replacement original]
+; 	(let [split-point (min place (count original))]
+; 		(into [] (concat (subvec original 0 split-point)
+; 				  		  (vector replacement)
+; 				  		  (subvec original (+ split-point 1))))))
+
+(defn nth-replace
+	[original place replacement]
+	(cond (empty? original) nil
+		(= place 0)
+		(cons replacement (rest original))
+		true (cons (first original)
+			(nth-replace (rest original) (- place 1) replacement))))
 
 (defn -main
   "Tic-tac-toe main method"
