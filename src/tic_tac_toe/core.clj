@@ -4,6 +4,9 @@
 (def board-symbol-map
 	{ nil "__" :x "X" :o "O" })
 
+(def whose-turn
+	{ 0 :x 1 :o} )
+
 (defn get-move
 	[board row col]
 	(nth (nth board row) col))
@@ -99,6 +102,7 @@
 (defn check-vertical-winner
 	[board player]
 	(check-horizontal-winner (get-vertical-vectors board) player))
+
 (defn get-diagonal-vectors
 	[board]
 	(vector (vector (get-move board 0 0)
@@ -110,21 +114,56 @@
 
 (defn check-diagonal-winner
 	[board player]
+	"Returns true if player has 3 in a row diagonally, false if not."
 	(check-horizontal-winner (get-diagonal-vectors board) player))
 
 (defn has-player-won
 	[board player]
-	(or (check-horizontal-winner board player)
-		(check-vertical-winner board player)
-		(check-diagonal-winner board player)))
+	"Returns true if player has won, false if not"
+	(cond 
+		(nil? player)
+			nil
+		:else
+			(or (check-horizontal-winner board player)
+			(check-vertical-winner board player)
+			(check-diagonal-winner board player))))
+
+(defn get-winner-message
+	[winner]
+	"Returns a string message of the winner"
+	(str "Player " (board-symbol-map winner) " has won. Congrats!"))
+
+(defn get-curr-player-message
+	[curr-player]
+	"Returns a string message of who's turn it is currently"
+	(str "Current player: " (board-symbol-map curr-player)))
+
+(defn is-board-full
+	[board]
+	"Returns true if the board is full, false if not"
+	(not (some (fn[row] (some (fn[col] (nil? col)) row)) board)))
+
+(defn get-prev-player
+	[n]
+	(whose-turn (mod (- n 1) 2)))
 
 (defn -main
   "Tic-tac-toe main method"
   [& args]
-  (println "Hello, World!")
-  (print-board (get-empty-board))
-  (print-board (apply-move (get-empty-board) :o)))
- ; (print (parse-letter "a")))
+  (println "Starting tic-tac-toe game.")
+	(loop [n 0
+		   board (get-empty-board)]
+		(let [curr-player (whose-turn (mod n 2))
+			  prev-player (get-prev-player n)]
+			(println (get-curr-player-message curr-player))
+			(println (print-board board))
+			(cond 
+				(has-player-won board prev-player)
+					(println (get-winner-message prev-player))
+				(is-board-full board)
+					(println "Draw - game over. Better luck next time!")
+				:else 
+					(recur (+ n 1) (apply-move board curr-player))))))
 
 
 
