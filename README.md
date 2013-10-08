@@ -1,1 +1,1 @@
-Implementation of tic-tac-toe in Clojure. 
+Implementation of tic-tac-toe in Clojure. See /src/tic-tac-toe/core.clj for comments. 
