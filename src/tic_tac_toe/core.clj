@@ -4,10 +4,18 @@
 (def board-symbol-map
 	{ nil "__" :x "X" :o "O" })
 
+(defn nth-replace
+	[original place replacement]
+	(cond (empty? original) nil
+		(= place 0)
+		(cons replacement (rest original))
+		true (cons (first original)
+			(nth-replace (rest original) (- place 1) replacement))))
+
 (defn get-empty-board
 	[]
 	  (into [] (repeat 3
-	  	(into [] (repeat 3 :empty)))))
+	  	(into [] (repeat 3 nil)))))
 
 (defn print-board
 	"Prints board to screen. Right now, is very minimalistic and not super pretty."
@@ -59,17 +67,10 @@
 	(let [working-row (nth board row)]
 		(if (not (nth working-row col))
 			(into [] (nth-replace working-row col curr-player))
-				; (into [] (vector (subvec working-row 0 col) 
-				; 			 	 (vector curr-player) 
-				; 			 	 (subvec working-row (+ col 1))))
-			working-row
-			)))
+			working-row)))
 
 (defn update-board
 	[board row col curr-player]
-	; (filter (fn[x] (not (empty? x))) (vector (subvec board 0 row) 
-	; 				 						 (get-modified-row board row col curr-player)
-	; 				 						 (subvec board (+ row 1)))))
 	(into [] (nth-replace board row (get-modified-row board row col curr-player))))
 
 (defn apply-move
@@ -77,30 +78,40 @@
 	(let [square (get-square (read-line))]
 			(if (nil? square)
 				(println "Invalid move")
-				(update-board board square curr-player))))
+				(update-board board (first square) (last square) curr-player))))
 
-; (defn splice
-; 	[place replacement original]
-; 	(let [split-point (min place (count original))]
-; 		(into [] (concat (subvec original 0 split-point)
-; 				  		  (vector replacement)
-; 				  		  (subvec original (+ split-point 1))))))
+(defn check-horizontal-winner
+	[board player]
+	(some (fn[row] (every? (fn[col] (= col player)) row)) board))
 
-(defn nth-replace
-	[original place replacement]
-	(cond (empty? original) nil
-		(= place 0)
-		(cons replacement (rest original))
-		true (cons (first original)
-			(nth-replace (rest original) (- place 1) replacement))))
+(defn check-vertical-winner
+	[board player]
+	)
+(defn get-diagonal-vectors
+	[board]
+	(vector (vector (get-move board 0 0)
+					(get-move board 1 1)
+					(get-move board 2 2)
+			(vector (get-move board 0 2)
+					(get-move board 1 1)
+					(get-move board 2 0)))))
+
+(defn check-diagonal-winner
+	[board player]
+	(let [result [[]]]
+		(conj result 1)
+		(println result)))
+
+(defn get-move
+	[board row col]
+	(nth (nth board row) col))
 
 (defn -main
   "Tic-tac-toe main method"
   [& args]
   (println "Hello, World!")
   (print-board (get-empty-board))
-  ;(println (get-square "A2")))
-  (apply-move (get-empty-board) :o))
+  (print-board (apply-move (get-empty-board) :o)))
  ; (print (parse-letter "a")))
 
 
