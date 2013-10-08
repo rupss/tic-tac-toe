@@ -62,12 +62,17 @@
 	"Move will have the format <letter><number> e.g A1
 	Refers to <row><column>"
 	[move]
-	(let [row (parse-letter (str (nth move 0)))
-		  col (parse-int (str (nth move 1)))
-		  ]
-		(if (or (nil? row) (nil? col))
+	(cond 
+		(not (== (count move) 2))
 			nil
-			(list row col))))
+		:else
+			(do 
+				(let [row (parse-letter (str (nth move 0)))
+					  col (parse-int (str (nth move 1)))
+					  ]
+					(if (or (nil? row) (nil? col))
+						nil
+						(list row col))))))
 
 (defn get-modified-row
 	[board row col curr-player]
@@ -83,8 +88,10 @@
 (defn apply-move
 	[board curr-player]
 	(let [square (get-square (read-line))]
-			(if (nil? square)
-				(println "Invalid move")
+		(cond 
+			(nil? square)
+				board
+			:else
 				(update-board board (first square) (last square) curr-player))))
 
 (defn check-horizontal-winner
@@ -163,7 +170,15 @@
 				(is-board-full board)
 					(println "Draw - game over. Better luck next time!")
 				:else 
-					(recur (+ n 1) (apply-move board curr-player))))))
+					(do 
+						(let [new-board (apply-move board curr-player)]
+							(cond 
+								(= new-board board)
+									(do 
+										(println "Invalid move. Try again")
+										(recur n board))
+								:else 
+									(recur (+ n 1) new-board))))))))
 
 
 
