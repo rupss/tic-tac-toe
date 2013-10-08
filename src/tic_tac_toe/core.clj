@@ -4,6 +4,10 @@
 (def board-symbol-map
 	{ nil "__" :x "X" :o "O" })
 
+(defn get-move
+	[board row col]
+	(nth (nth board row) col))
+
 (defn nth-replace
 	[original place replacement]
 	(cond (empty? original) nil
@@ -84,27 +88,35 @@
 	[board player]
 	(some (fn[row] (every? (fn[col] (= col player)) row)) board))
 
+(defn get-vertical-vectors
+	[board]
+	(loop [n 0
+		   result []]
+		(if (> n 2)
+			result
+			(recur (+ n 1) (conj result (into [] (map (fn[x] (nth x n)) board)))))))
+
 (defn check-vertical-winner
 	[board player]
-	)
+	(check-horizontal-winner (get-vertical-vectors board) player))
 (defn get-diagonal-vectors
 	[board]
 	(vector (vector (get-move board 0 0)
 					(get-move board 1 1)
-					(get-move board 2 2)
+					(get-move board 2 2))
 			(vector (get-move board 0 2)
 					(get-move board 1 1)
-					(get-move board 2 0)))))
+					(get-move board 2 0))))
 
 (defn check-diagonal-winner
 	[board player]
-	(let [result [[]]]
-		(conj result 1)
-		(println result)))
+	(check-horizontal-winner (get-diagonal-vectors board) player))
 
-(defn get-move
-	[board row col]
-	(nth (nth board row) col))
+(defn has-player-won
+	[board player]
+	(or (check-horizontal-winner board player)
+		(check-vertical-winner board player)
+		(check-diagonal-winner board player)))
 
 (defn -main
   "Tic-tac-toe main method"
