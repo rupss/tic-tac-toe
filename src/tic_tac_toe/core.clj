@@ -11,6 +11,9 @@
 (def whose-turn
 	{ 0 :x 1 :o} )
 
+(def letter-vec
+	["a" "b" "c"])
+
 (defn get-empty-board
 	"Returns an empty board"
 	[]
@@ -31,7 +34,7 @@
 		so it be used to access the correct column in the board. Returns the 
 		col number if letter is valid, otherwise nil"
 	[letter]
-	(let [num (- (int (nth (.toLowerCase letter) 0)) (int \a))]
+	(let [num (.indexOf letter-vec letter)]
 		(if (<= 0 num 2)
 			num
 			nil)))
@@ -52,10 +55,9 @@
 	"Move will have the format <letter><number> e.g A1
 	Refers to <column><row>"
 	[move]
-	(cond 
+	(if
 		(not (== (count move) 2))
 			nil
-		:else
 			(do 
 				(let [col (parse-letter (str (nth move 0)))
 					  row (parse-int (str (nth move 1)))
