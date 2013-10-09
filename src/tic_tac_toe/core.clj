@@ -11,12 +11,6 @@
 (def whose-turn
 	{ 0 :x 1 :o} )
 
-
-(defn get-move
-	"Helper function to return item at row/col"
-	[board row col]
-	(nth (nth board row) col))
-
 (defn nth-replace
 	"Replaces the place'th item in original with replacement and returns the new collection. 
 	Returns nil if original is empty"
@@ -138,12 +132,12 @@
 	"Returns a vector of 2 vectors. Each \"subvector\" contains the items in a diagonal, in 
 	order"
 	[board]
-	(vector (vector (get-move board 0 0)
-					(get-move board 1 1)
-					(get-move board 2 2))
-			(vector (get-move board 0 2)
-					(get-move board 1 1)
-					(get-move board 2 0))))
+	(vector (vector (get-in board [0 0])
+					(get-in board [1 1])
+					(get-in board [2 2]))
+			(vector (get-in board [0 2])
+					(get-in board [1 1])
+					(get-in board [2 0]))))
 
 (defn check-diagonal-winner
 	"Returns true if player has 3 in a row diagonally, false if not."
@@ -190,7 +184,7 @@
 		(let [curr-player (whose-turn (mod n 2))
 			  prev-player (get-prev-player n)]
 			(println (get-curr-player-message curr-player))
-			(println (print-board board))
+			(print-board board)
 			(cond 
 				; Base case #1 - if the previous player won
 				(has-player-won board prev-player)
