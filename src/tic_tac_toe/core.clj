@@ -1,7 +1,7 @@
 ; NOTE: still prints nil upon every move to the screen...not sure how to get rid of it
 
 (ns tic-tac-toe.core
-  (:gen-class))
+	(:gen-class))
 
 ; For printing the board
 (def board-symbol-map
@@ -17,7 +17,7 @@
 (defn get-empty-board
 	"Returns an empty board"
 	[]
-	  (into [] (map #(into [] %1) (partition 3 (repeat 9 nil)))))
+	(into [] (map #(into [] %1) (partition 3 (repeat 9 nil)))))
 
 (defn print-board
 	"Prints board to screen"
@@ -31,8 +31,8 @@
 
 (defn parse-letter
 	"letter is a string. Translates the letter to the appropriate number (a-0, b-1, c-2)
-		so it be used to access the correct column in the board. Returns the 
-		col number if letter is valid, otherwise nil"
+	so it be used to access the correct column in the board. Returns the 
+	col number if letter is valid, otherwise nil"
 	[letter]
 	(let [num (.indexOf letter-vec letter)]
 		(if (<= 0 num 2)
@@ -57,14 +57,14 @@
 	[move]
 	(if
 		(not (== (count move) 2))
-			nil
-			(do 
-				(let [col (parse-letter (str (nth move 0)))
-					  row (parse-int (str (nth move 1)))
-					  ]
-					(if (or (nil? row) (nil? col))
-						nil
-						(list row col))))))
+		nil
+		(do 
+			(let [col (parse-letter (str (nth move 0)))
+				row (parse-int (str (nth move 1)))
+				]
+				(if (or (nil? row) (nil? col))
+					nil
+					(list row col))))))
 
 (defn get-modified-row
 	"row and col are the indices of the move to make. This function returns the 
@@ -88,9 +88,9 @@
 		(println)
 		(cond 
 			(nil? square)
-				board
+			board
 			:else
-				(update-board board (first square) (last square) curr-player))))
+			(update-board board (first square) (last square) curr-player))))
 
 (defn check-horizontal-winner
 	"Checks if there are 3 in a row of player in board"
@@ -102,7 +102,7 @@
 	in order"
 	[board]
 	(loop [n 0
-		   result []]
+		result []]
 		(if (> n 2)
 			result
 			(recur (+ n 1) (conj result (into [] (map (fn[x] (nth x n)) board)))))))
@@ -117,11 +117,11 @@
 	order"
 	[board]
 	(vector (vector (get-in board [0 0])
-					(get-in board [1 1])
-					(get-in board [2 2]))
-			(vector (get-in board [0 2])
-					(get-in board [1 1])
-					(get-in board [2 0]))))
+		(get-in board [1 1])
+		(get-in board [2 2]))
+	(vector (get-in board [0 2])
+		(get-in board [1 1])
+		(get-in board [2 0]))))
 
 (defn check-diagonal-winner
 	"Returns true if player has 3 in a row diagonally, false if not."
@@ -133,9 +133,9 @@
 	[board player]
 	(cond 
 		(nil? player)
-			nil
+		nil
 		:else
-			(or (check-horizontal-winner board player)
+		(or (check-horizontal-winner board player)
 			(check-vertical-winner board player)
 			(check-diagonal-winner board player))))
 
@@ -160,34 +160,34 @@
 	(whose-turn (mod (- n 1) 2)))
 
 (defn -main
-  "Tic-tac-toe main method"
-  [& args]
-  (println "Starting tic-tac-toe game.")
+	"Tic-tac-toe main method"
+	[& args]
+	(println "Starting tic-tac-toe game.")
 	(loop [n 0
-		   board (get-empty-board)]
+		board (get-empty-board)]
 		(let [curr-player (whose-turn (mod n 2))
-			  prev-player (get-prev-player n)]
+			prev-player (get-prev-player n)]
 			(println (get-curr-player-message curr-player))
 			(print-board board)
 			(cond 
 				; Base case #1 - if the previous player won
 				(has-player-won board prev-player)
-					(println (get-winner-message prev-player))
+				(println (get-winner-message prev-player))
 				; Base case #2 - if the board is full (no more valid moves to make)
 				(is-board-full board)
-					(println "Draw - game over. Better luck next time!")
+				(println "Draw - game over. Better luck next time!")
 				:else 
 				; Recursive step
-					(do 
-						(let [new-board (apply-move board curr-player)]
-							(cond 
-								(= new-board board)
-									(do 
-										(println "Invalid move. Try again\n")
+				(do 
+					(let [new-board (apply-move board curr-player)]
+						(cond 
+							(= new-board board)
+							(do 
+								(println "Invalid move. Try again\n")
 										; was an invalid move, so keep the same player i.e n stays the same
 										(recur n board)) 
 								:else ; was a valid move, so move on to next player i.e increment n
-									(recur (+ n 1) new-board))))))))
+								(recur (+ n 1) new-board))))))))
 
 
 
