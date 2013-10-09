@@ -14,8 +14,7 @@
 (defn get-empty-board
 	"Returns an empty board"
 	[]
-	  (into [] (repeat 3
-	  	(into [] (repeat 3 nil)))))
+	  (into [] (map #(into [] %1) (partition 3 (repeat 9 nil)))))
 
 (defn print-board
 	"Prints board to screen"
@@ -27,20 +26,13 @@
 			(apply str 
 				(interpose " " (map (fn [x] (board-symbol-map x)) (nth board n)))))))
 
-(defn num-is-valid
-	"Returns true if 0 <= num < 3, false if not."
-	[num]
-	(if (and (>= num 0) (< num 3))
-			true
-			false))
-
 (defn parse-letter
 	"letter is a string. Translates the letter to the appropriate number (a-0, b-1, c-2)
 		so it be used to access the correct column in the board. Returns the 
 		col number if letter is valid, otherwise nil"
 	[letter]
 	(let [num (- (int (nth (.toLowerCase letter) 0)) (int \a))]
-		(if (num-is-valid num)
+		(if (<= 0 num 2)
 			num
 			nil)))
 
@@ -50,7 +42,7 @@
 	[number]
 	(try 
 		(let [num (. Integer parseInt number)]
-			(if (num-is-valid num)
+			(if (<= 0 num 2)
 				num
 				nil))
 		(catch Exception e 
