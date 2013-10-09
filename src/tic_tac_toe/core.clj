@@ -11,16 +11,6 @@
 (def whose-turn
 	{ 0 :x 1 :o} )
 
-(defn nth-replace
-	"Replaces the place'th item in original with replacement and returns the new collection. 
-	Returns nil if original is empty"
-	[original place replacement]
-	(cond (empty? original) nil
-		(= place 0)
-		(cons replacement (rest original))
-		true (cons (first original)
-			(nth-replace (rest original) (- place 1) replacement))))
-
 (defn get-empty-board
 	"Returns an empty board"
 	[]
@@ -88,13 +78,13 @@
 	[board row col curr-player]
 	(let [working-row (nth board row)]
 		(if (not (nth working-row col))
-			(into [] (nth-replace working-row col curr-player))
+			(into [] (assoc working-row col curr-player))
 			working-row)))
 
 (defn update-board
 	"Returns the board updated with the new move"
 	[board row col curr-player]
-	(into [] (nth-replace board row (get-modified-row board row col curr-player))))
+	(into [] (assoc board row (get-modified-row board row col curr-player))))
 
 (defn apply-move
 	[board curr-player]
