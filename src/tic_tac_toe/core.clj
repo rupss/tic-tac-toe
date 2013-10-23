@@ -167,12 +167,22 @@
     (is-board-full board) 0
     :else nil))
 
+(defn get-nil-indices
+  [row]
+  (keep-indexed #(if (nil? %2) %1) row))
+
 (defn get-empty-squares
   [board]
-  )
+  (apply concat (keep-indexed #(attach-row-coord %1 %2)
+    sample-empties)))
+
+(defn attach-row-coord
+  [row-coord items-list]
+  (map #(list row-coord %) items-list))
 
 (defn get-all-actions
   [board curr-player]
+  (map (fn[x] (update-board board (first x) (last x) curr-player)) (get-empty-squares board))
   )
 
 (defn -main
