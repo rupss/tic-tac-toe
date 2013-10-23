@@ -96,7 +96,7 @@
   (some (fn[row] (every? (fn[col] (= col player)) row)) board))
 
 (defn get-vertical-vectors
-  "Returns a vector of 3 vectors. Each \"subvector\" contains the items of a column of board, 
+  "Returns a vector of 3 vectors. Each 'subvector' contains the items of a column of board,
   in order"
   [board]
   (loop [n 0
@@ -111,7 +111,7 @@
   (check-horizontal-winner (get-vertical-vectors board) player))
 
 (defn get-diagonal-vectors
-  "Returns a vector of 2 vectors. Each \"subvector\" contains the items in a diagonal, in 
+  "Returns a vector of 2 vectors. Each 'subvector' contains the items in a diagonal, in
   order"
   [board]
   (vector (vector (get-in board [0 0])
@@ -156,6 +156,24 @@
   "Returns the previous player"
   [n]
   (whose-turn (mod (- n 1) 2)))
+
+(defn utility
+  "Utility function for the minimax algorithm.
+  :x is the max player and :o is the min player"
+  [board]
+  (cond
+    (has-player-won board :x) 1
+    (has-player-won board :o) -1
+    (is-board-full board) 0
+    :else nil))
+
+(defn get-empty-squares
+  [board]
+  )
+
+(defn get-all-actions
+  [board curr-player]
+  )
 
 (defn -main
   "Tic-tac-toe main method"
