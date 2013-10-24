@@ -12,6 +12,9 @@
 (def letter-vec
   ["a" "b" "c"])
 
+; The computer's player
+(def computer :o)
+
 (defn get-empty-board
   "Returns an empty board"
   []
@@ -24,8 +27,8 @@
   (println "---------")
   (dotimes [n (count board)]
     (println (str n "|")
-             (apply str 
-                    (interpose " " (map (fn [x] (board-symbol-map x)) (nth board n)))))))
+     (apply str
+      (interpose " " (map (fn [x] (board-symbol-map x)) (nth board n)))))))
 
 (defn parse-letter
   "letter is a string. Translates the letter to the appropriate number (a-0, b-1, c-2)
@@ -58,8 +61,8 @@
     nil
     (do 
       (let [col (parse-letter (str (nth move 0)))
-            row (parse-int (str (nth move 1)))
-            ]
+        row (parse-int (str (nth move 1)))
+        ]
         (if (or (nil? row) (nil? col))
           nil
           (list row col))))))
@@ -78,18 +81,6 @@
   [board row col curr-player]
   (into [] (assoc board row (get-modified-row board row col curr-player))))
 
-(defn apply-move
-  [board curr-player]
-  "If the move is valid, returns the updated board. Otherwise, returns the unmodified board"
-  (println "Your move: (<letter><number>)")
-  (let [square (get-square (read-line))]
-    (println)
-    (cond 
-      (nil? square)
-      board
-      :else
-      (update-board board (first square) (last square) curr-player))))
-
 (defn check-horizontal-winner
   "Checks if there are 3 in a row of player in board"
   [board player]
@@ -100,10 +91,10 @@
   in order"
   [board]
   (loop [n 0
-         result []]
-    (if (> n 2)
-      result
-      (recur (+ n 1) (conj result (into [] (map (fn[x] (nth x n)) board)))))))
+   result []]
+   (if (> n 2)
+    result
+    (recur (+ n 1) (conj result (into [] (map (fn[x] (nth x n)) board)))))))
 
 (defn check-vertical-winner
   "Returns true if there are 3 in a row of player vertically in board, false if not"
@@ -115,11 +106,11 @@
   order"
   [board]
   (vector (vector (get-in board [0 0])
-                  (get-in board [1 1])
-                  (get-in board [2 2]))
-          (vector (get-in board [0 2])
-                  (get-in board [1 1])
-                  (get-in board [2 0]))))
+    (get-in board [1 1])
+    (get-in board [2 2]))
+  (vector (get-in board [0 2])
+    (get-in board [1 1])
+    (get-in board [2 0]))))
 
 (defn check-diagonal-winner
   "Returns true if player has 3 in a row diagonally, false if not."
@@ -134,8 +125,8 @@
     nil
     :else
     (or (check-horizontal-winner board player)
-        (check-vertical-winner board player)
-        (check-diagonal-winner board player))))
+      (check-vertical-winner board player)
+      (check-diagonal-winner board player))))
 
 (defn get-winner-message
   "Returns a string message of the winner"
@@ -145,7 +136,10 @@
 (defn get-curr-player-message
   "Returns a string message of who's turn it is currently"
   [curr-player]
-  (str "Current player: " (board-symbol-map curr-player)))
+  (let [base (str "Current player: " (board-symbol-map curr-player))]
+    (if (= curr-player :o)
+      (str base " (the computer)")
+      base)))
 
 (defn is-board-full
   "Returns true if the board is full, false if not"
@@ -175,33 +169,41 @@
 
 (defn get-nil-indices
   [row]
+  "For a particular row, returns the indices of its nil items."
   (keep-indexed #(if (nil? %2) %1) row))
 
-(defn get-empty-squares
-  [board]
-  (apply concat (keep-indexed #(attach-row-coord %1 %2)
-    (map get-nil-indices board))))
-
 (defn attach-row-coord
+  "Given a row-coord (e.g 2) and an items list (e.g (0 1)), returns a list of lists where
+  row-coord is attached to each item e.g ( (2 0) (2 1))"
   [row-coord items-list]
   (map #(list row-coord %) items-list))
 
+(defn get-empty-squares
+  [board]
+  "Returns a list of (row, col) lists that are the coordinates of the nil squares in board"
+  (apply concat (keep-indexed #(attach-row-coord %1 %2)
+    (map get-nil-indices board))))
+
 (defn get-all-actions
   [board curr-player]
+  "Returns a list of all possible actions (boards) for the curr-player from board"
   (map (fn[x] (update-board board (first x) (last x) curr-player)) (get-empty-squares board)))
 
 (defn get-comparison-fn
   [curr-player]
+  "Returns the appropriate comparison function for minimax"
   (cond 
     (= curr-player :x) >
     (= curr-player :o) <))
 
 (defn print-arr-boards
   [arr-boards]
+  "For debugging purposes"
   (doseq [item arr-boards]
     (print-board item)))
 
 (defn print-pairs
+  "For debugging purposes"
   [pairs player board comp-fn]
   (println "PAIRS")
   (doseq [item pairs]
@@ -218,61 +220,52 @@
 
 (defn minimax-recursive
   [curr-board curr-player]
-  ; (println "CURR BOARD")
-  ; (print-board curr-board)
-  ; (println "PLAYER")
-  ; (println curr-player)
+  "Recursive minimax implementation."
   (let [curr-util (utility curr-board)]
     (if (not (nil? curr-util))
       curr-util
       (do 
         (let [actions (get-all-actions curr-board curr-player)
-              comp-fn (get-comparison-fn curr-player)]
-          (println "ACTIONS")
-          (print-arr-boards actions)
+          comp-fn (get-comparison-fn curr-player)]
           (let [action-util-pairs (map (fn[a] (list a (minimax-recursive a (get-other-player curr-player)))) actions)]
-            (print-pairs action-util-pairs curr-player curr-board comp-fn)
             (last (first (sort-by last comp-fn action-util-pairs)))))))))
-        
+
 (defn minimax
+  "Wrapper function for the minimax algorithm"
   [board player]
-  ;   (println "CURR BOARD")
-  ; (print-board board)
-  ; (println "PLAYER")
-  ; (println player)
   (let [actions (get-all-actions board player)]
-    (println "ACTIONS")
-    (print-arr-boards actions)
     (let [comp-fn (get-comparison-fn player)
-          action-util-pairs (map (fn[a] (list a (minimax-recursive a (get-other-player player)))) actions)]
-      (println "#$#$ RESULT PAIRS #$#$#")
-      ; (print-pairs (sort-by last comp-fn action-util-pairs) player board comp-fn)
-      (println "SORTED" (sort-by last comp-fn action-util-pairs))
-      (println "UNSORTED" action-util-pairs)
-      (println "COMPFN" comp-fn)
-      (println "---PICKING----")
-      (println (first (sort-by last comp-fn action-util-pairs)))
+      action-util-pairs (map (fn[a] (list a (minimax-recursive a (get-other-player player)))) actions)]
       (first (first (sort-by last comp-fn action-util-pairs))))))
 
-(defn testing
+(defn apply-move
   [board curr-player]
-  (let [result (minimax board curr-player)]
-    (println "SUGGESTED MOVE")
-    (print-board result)
-    (println "ORIGINAL BOARD")
-    (print-board board)))
+  "If the move is valid, returns the updated board. Otherwise, returns the unmodified board.
+   If it's the computer's turn, the computer plays based on the minimax algorithm."
+  (if (= curr-player computer)
+    (do
+      (minimax board curr-player))
+    (do
+      (println "Your move: (<letter><number>)")
+      (let [square (get-square (read-line))]
+        (println)
+        (cond
+          (nil? square)
+          board
+          :else
+          (update-board board (first square) (last square) curr-player))))))
 
 (defn -main
   "Tic-tac-toe main method"
   [& args]
   (println "Starting tic-tac-toe game.")
   (loop [n 0
-         board (get-empty-board)]
-    (let [curr-player (whose-turn (mod n 2))
-          prev-player (get-prev-player n)]
-      (println (get-curr-player-message curr-player))
-      (print-board board)
-      (cond 
+   board (get-empty-board)]
+   (let [curr-player (whose-turn (mod n 2))
+    prev-player (get-prev-player n)]
+    (println (get-curr-player-message curr-player))
+    (print-board board)
+    (cond
         ; Base case #1 - if the previous player won
         (has-player-won board prev-player)
         (println (get-winner-message prev-player))
