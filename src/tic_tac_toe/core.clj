@@ -157,6 +157,12 @@
   [n]
   (whose-turn (mod (- n 1) 2)))
 
+(defn get-other-player
+  [curr-player]
+  (cond 
+    (= curr-player :x) :o
+    (= curr-player :o) :x))
+
 (defn utility
   "Utility function for the minimax algorithm.
   :x is the max player and :o is the min player"
@@ -174,7 +180,7 @@
 (defn get-empty-squares
   [board]
   (apply concat (keep-indexed #(attach-row-coord %1 %2)
-    sample-empties)))
+    (map get-nil-indices board))))
 
 (defn attach-row-coord
   [row-coord items-list]
@@ -182,8 +188,79 @@
 
 (defn get-all-actions
   [board curr-player]
-  (map (fn[x] (update-board board (first x) (last x) curr-player)) (get-empty-squares board))
-  )
+  (map (fn[x] (update-board board (first x) (last x) curr-player)) (get-empty-squares board)))
+
+(defn get-comparison-fn
+  [curr-player]
+  (cond 
+    (= curr-player :x) >
+    (= curr-player :o) <))
+
+(defn print-arr-boards
+  [arr-boards]
+  (doseq [item arr-boards]
+    (print-board item)))
+
+(defn print-pairs
+  [pairs player board comp-fn]
+  (println "PAIRS")
+  (doseq [item pairs]
+    (println "*****")
+    (print-board (first item))
+    (println (last item))
+    (println "*****"))
+  (println "BOARD")
+  (print-board board)
+  (println "PLAYER")
+  (println player)
+  (println "COMP FN")
+  (println comp-fn))
+
+(defn minimax-recursive
+  [curr-board curr-player]
+  ; (println "CURR BOARD")
+  ; (print-board curr-board)
+  ; (println "PLAYER")
+  ; (println curr-player)
+  (let [curr-util (utility curr-board)]
+    (if (not (nil? curr-util))
+      curr-util
+      (do 
+        (let [actions (get-all-actions curr-board curr-player)
+              comp-fn (get-comparison-fn curr-player)]
+          (println "ACTIONS")
+          (print-arr-boards actions)
+          (let [action-util-pairs (map (fn[a] (list a (minimax-recursive a (get-other-player curr-player)))) actions)]
+            (print-pairs action-util-pairs curr-player curr-board comp-fn)
+            (last (first (sort-by last comp-fn action-util-pairs)))))))))
+        
+(defn minimax
+  [board player]
+  ;   (println "CURR BOARD")
+  ; (print-board board)
+  ; (println "PLAYER")
+  ; (println player)
+  (let [actions (get-all-actions board player)]
+    (println "ACTIONS")
+    (print-arr-boards actions)
+    (let [comp-fn (get-comparison-fn player)
+          action-util-pairs (map (fn[a] (list a (minimax-recursive a (get-other-player player)))) actions)]
+      (println "#$#$ RESULT PAIRS #$#$#")
+      ; (print-pairs (sort-by last comp-fn action-util-pairs) player board comp-fn)
+      (println "SORTED" (sort-by last comp-fn action-util-pairs))
+      (println "UNSORTED" action-util-pairs)
+      (println "COMPFN" comp-fn)
+      (println "---PICKING----")
+      (println (first (sort-by last comp-fn action-util-pairs)))
+      (first (first (sort-by last comp-fn action-util-pairs))))))
+
+(defn testing
+  [board curr-player]
+  (let [result (minimax board curr-player)]
+    (println "SUGGESTED MOVE")
+    (print-board result)
+    (println "ORIGINAL BOARD")
+    (print-board board)))
 
 (defn -main
   "Tic-tac-toe main method"
