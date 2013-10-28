@@ -218,8 +218,8 @@
   (println "COMP FN")
   (println comp-fn))
 
-(defn minimax-recursive
-  [curr-board curr-player]
+(defn minimax
+  [curr-board curr-player counter]
   "Recursive minimax implementation."
   (let [curr-util (utility curr-board)]
     (if (not (nil? curr-util))
@@ -227,16 +227,11 @@
       (do 
         (let [actions (get-all-actions curr-board curr-player)
           comp-fn (get-comparison-fn curr-player)]
-          (let [action-util-pairs (map (fn[a] (list a (minimax-recursive a (get-other-player curr-player)))) actions)]
-            (last (first (sort-by last comp-fn action-util-pairs)))))))))
-
-(defn minimax
-  "Wrapper function for the minimax algorithm"
-  [board player]
-  (let [actions (get-all-actions board player)]
-    (let [comp-fn (get-comparison-fn player)
-      action-util-pairs (map (fn[a] (list a (minimax-recursive a (get-other-player player)))) actions)]
-      (first (first (sort-by last comp-fn action-util-pairs))))))
+          (let [action-util-pairs (map (fn[a] (list a (minimax-recursive a (get-other-player curr-player) (inc counter)))) actions)
+                best-one (first (sort-by last comp-fn action-util-pairs))]
+            (if (== counter 1)
+              (first best-one)
+              (last best-one))))))))
 
 (defn apply-move
   [board curr-player]
@@ -244,7 +239,7 @@
    If it's the computer's turn, the computer plays based on the minimax algorithm."
   (if (= curr-player computer)
     (do
-      (minimax board curr-player))
+      (minimax board curr-player 1))
     (do
       (println "Your move: (<letter><number>)")
       (let [square (get-square (read-line))]
